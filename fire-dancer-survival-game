@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火舞者，今天能順利平安下班嗎？ - 用火安全情境測驗</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e24;
+            --primary-orange: #ff6b35;
+            --danger-red: #e63946;
+            --success-green: #2a9d8f;
+            --text-color: #f1faee;
+            --sub-text: #a8dede;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.2);
+            width: 100%;
+            max-width: 600px;
+            padding: 24px;
+            box-sizing: border-box;
+            border: 1px solid #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary-orange);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            margin: 0 0 8px 0;
+            color: var(--primary-orange);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2a2a32;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-bg {
+            background-color: #444;
+            height: 12px;
+            width: 60%;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #e63946, #ff6b35);
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .scenario-box {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            min-height: 80px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: #2d2d38;
+            color: var(--text-color);
+            border: 1px solid #444;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: var(--primary-orange);
+            color: #121212;
+            font-weight: bold;
+            border-color: var(--primary-orange);
+        }
+
+        .feedback-box {
+            display: none;
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        .feedback-box.correct {
+            background-color: rgba(42, 157, 143, 0.2);
+            border: 1px solid var(--success-green);
+            color: #81e6d9;
+        }
+
+        .feedback-box.wrong {
+            background-color: rgba(230, 57, 70, 0.2);
+            border: 1px solid var(--danger-red);
+            color: #feb2b2;
+        }
+
+        .next-btn {
+            display: none;
+            width: 100%;
+            margin-top: 16px;
+            padding: 12px;
+            background-color: var(--primary-orange);
+            color: #121212;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .result-title {
+            font-size: 1.8rem;
+            color: var(--primary-orange);
+            margin-bottom: 12px;
+        }
+
+        .restart-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: var(--primary-orange);
+            color: #121212;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1 class="title">🔥 火舞者，今天能順利平安下班嗎？</h1>
+        <div class="subtitle">依據內政部消防署《火舞展演安全管理指引》主題測驗</div>
+    </div>
+
+    <!-- 遊戲進行畫面 -->
+    <div id="game-screen">
+        <div class="status-bar">
+            <span>安全執照點數</span>
+            <div class="progress-bar-bg">
+                <div id="safety-score-bar" class="progress-bar-fill"></div>
+            </div>
+            <span id="score-text">100 / 100</span>
+        </div>
+
+        <div id="scenario" class="scenario-box">題目載入中...</div>
+
+        <div id="options" class="options-container"></div>
+
+        <div id="feedback" class="feedback-box"></div>
+
+        <button id="next-btn" class="next-btn" onclick="nextQuestion()">下一題 👉</button>
+    </div>
+
+    <!-- 結算畫面 -->
+    <div id="result-screen" class="result-screen">
+        <h2 id="result-title" class="result-title"></h2>
+        <p id="result-desc"></p>
+        <button class="restart-btn" onclick="restartGame()">重新挑戰 🔄</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            scenario: "【情境一：接案現場】你接到一個酒吧室內派對的火舞演出邀約，老闆表示場地很有情調，希望你直接上台表演。請問該如何處理？",
+            options: [
+                { text: "直接演出，反正酒吧老闆說出事他負責。", correct: false, hp: -30, feedback: "❌ 錯誤！供公眾使用之室內空間依法屬於《消防法》第14條之1及《明火表演安全管理辦法》範疇，必須事先向地方消防局申請通過才能演出，否則違法！" },
+                { text: "告知老闆室內演出須依法向當地消防局申請明火表演許可，審核通過後才能演出。", correct: true, hp: 0, feedback: "⭕ 正確！室內明火表演受嚴格管轄，必須通過消防機關對防焰物品、設備與安全計畫的審核。" },
+                { text: "改用較少油量的火具，偷偷在室內甩火表演。", correct: false, hp: -30, feedback: "❌ 錯誤！無論油量多少，未經許可在室內明火演出皆屬違法且極具危險性！" }
+            ]
+        },
+        {
+            scenario: "【情境二：安全距離】在戶外公園做街頭表演時，圍觀民眾非常熱情並不斷往前靠。請問觀眾席與你的展演區域最少要保持多少距離？",
+            options: [
+                { text: "維持 1 公尺即可，越近觀眾越能感受震撼感。", correct: false, hp: -25, feedback: "❌ 錯誤！1 公尺極易發生油滴飛濺或火具甩出傷及民眾的意外。" },
+                { text: "至少維持 5 公尺以上的安全距離。", correct: true, hp: 0, feedback: "⭕ 正確！依據安全指引，展演區域與觀眾之間必須維持 5 公尺以上的安全距離！" },
+                { text: "只要畫一條線，距離不限。", correct: false, hp: -25, feedback: "❌ 錯誤！指引有明確規定具體的安全防護距離（5公尺）。" }
+            ]
+        },
+        {
+            scenario: "【情境三：現場防護員配置】演出時你安排了一位團員在旁協助。請問防護人員的配置與距離應符合哪些規範？",
+            options: [
+                { text: "防護員站在 10 公尺外拍照錄影兼顧看即可。", correct: false, hp: -25, feedback: "❌ 錯誤！距離太遠無法在第一時間應變。" },
+                { text: "展演區 3 公尺內配置適當安全人員，並持有滅火設備待命。", correct: true, hp: 0, feedback: "⭕ 正確！指引規定展演區 3 公尺內須有專責安全人員持有滅火器或防火毯待命。" },
+                { text: "不需要防護員，台上表演者自己帶一瓶水備用即可。", correct: false, hp: -25, feedback: "❌ 錯誤！展演過程中表演者無法自我兼顧緊急滅火，必須有專人待命。" }
+            ]
+        },
+        {
+            scenario: "【情境四：保險與事前通報】準備參加一場戶外藝術節的小型火舞表演，主辦單位問你需要準備什麼文件？",
+            options: [
+                { text: "簽署免責聲明書即可。", correct: false, hp: -20, feedback: "❌ 錯誤！免責聲明不符合法規安全管理要求。" },
+                { text: "向主管機關建立事前通報（提供安全計畫）並投保「公共意外責任險」。", correct: true, hp: 0, feedback: "⭕ 正確！指引明確規範非大型活動亦應建立事前通報機制並強制投保公共意外責任險。" },
+                { text: "什麼都不用，小型活動不需要任何報備與保險。", correct: false, hp: -20, feedback: "❌ 錯誤！指引已將小型與街頭展演納入管理範疇。" }
+            ]
+        },
+        {
+            scenario: "【情境五：突發燒燙傷應變】表演結束後，夥伴不慎被火具燙傷皮膚。請問第一時間處置與通報流程為何？",
+            options: [
+                { text: "塗抹牙膏或醬油降溫，繼續準備下一場表演。", correct: false, hp: -30, feedback: "❌ 錯誤！塗抹異物會造成傷口感染與二次傷害。" },
+                { text: "執行沖脫泡蓋送急救，若情況嚴重或大面積接觸火源立即撥打 119 通報協助送醫。", correct: true, hp: 0, feedback: "⭕ 正確！指引明確規定應建立緊急急救機制並第一時間通報 119。" },
+                { text: "自行開車回飯店休息，觀察明天狀況。", correct: false, hp: -30, feedback: "❌ 錯誤！燒燙傷需要即時專業醫護處置，避免延誤就醫。" }
+            ]
+        }
+    ];
+
+    let currentQuestion = 0;
+    let hp = 100;
+
+    function loadQuestion() {
+        const q = questions[currentQuestion];
+        document.getElementById('scenario').innerText = q.scenario;
+        
+        const optionsContainer = document.getElementById('options');
+        optionsContainer.innerHTML = '';
+        
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt.text;
+            btn.onclick = () => selectOption(opt);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function selectOption(option) {
+        // 停用所有按鈕
+        const btns = document.querySelectorAll('.option-btn');
+        btns.forEach(b => b.disabled = true);
+
+        // 扣除點數
+        hp += option.hp;
+        if (hp < 0) hp = 0;
+        updateScoreBar();
+
+        // 顯示回饋
+        const feedback = document.getElementById('feedback');
+        feedback.innerText = option.feedback;
+        feedback.className = 'feedback-box ' + (option.correct ? 'correct' : 'wrong');
+        feedback.style.display = 'block';
+
+        // 顯示下一題或結算
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function updateScoreBar() {
+        const fill = document.getElementById('safety-score-bar');
+        const text = document.getElementById('score-text');
+        fill.style.width = hp + '%';
+        text.innerText = hp + ' / 100';
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < questions.length && hp > 0) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('game-screen').style.display = 'none';
+        const resultScreen = document.getElementById('result-screen');
+        resultScreen.style.display = 'block';
+
+        const title = document.getElementById('result-title');
+        const desc = document.getElementById('result-desc');
+
+        if (hp === 100) {
+            title.innerText = '🏆 安全神人火舞者！安全平安下班！';
+            desc.innerText = '你完全掌握最新《火舞展演安全管理指引》！不僅表演精彩，安全防護與法規意識也是頂級標準，是業界的優質典範！';
+        } else if (hp >= 60) {
+            title.innerText = '⚠️ 順利完賽，但險象環生！';
+            desc.innerText = '雖然平安下班，但在部分安全規範（如安全距離或室內申請流程）上仍有疏漏，記得多複習指引規定喔！';
+        } else {
+            title.innerText = '🚨 吊銷展演！現場發生嚴重安全事故';
+            desc.innerText = '由於缺乏法規意識與安全防護概念，導致表演現場安全失控。請重新研讀《火舞展演安全管理指引》後再出發！';
+        }
+    }
+
+    function restartGame() {
+        currentQuestion = 0;
+        hp = 100;
+        updateScoreBar();
+        document.getElementById('game-screen').style.display = 'block';
+        document.getElementById('result-screen').style.display = 'none';
+        loadQuestion();
+    }
+
+    // 初始化載入
+    loadQuestion();
+</script>
+
+</body>
+</html>
